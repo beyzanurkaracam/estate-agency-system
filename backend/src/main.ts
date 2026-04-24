@@ -13,14 +13,18 @@ async function bootstrap() {
 
   const port = config.get<number>('PORT') ?? 3000;
   const apiPrefix = config.get<string>('API_PREFIX') ?? 'api';
-  const corsOrigin = config.get<string>('CORS_ORIGIN');
+  const corsOriginRaw = config.get<string>('CORS_ORIGIN') ?? '';
+  const corsOrigins = corsOriginRaw
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
 
   // Global API prefix — /agents yerine /api/agents
   app.setGlobalPrefix(apiPrefix);
 
-  // CORS
+  // CORS — virgüllü liste: birden fazla origin desteği (prod + preview)
   app.enableCors({
-    origin: corsOrigin,
+    origin: corsOrigins.length > 1 ? corsOrigins : corsOrigins[0],
     credentials: true,
   });
 

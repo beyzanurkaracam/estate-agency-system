@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { envValidationSchema } from './config/env.validation';
 import { AgentsModule } from './modules/agents.module';
+import { HealthModule } from './modules/health/health.module';
 import { PropertiesModule } from './modules/properties/properties.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 
@@ -27,6 +28,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
     }),
 
     // Feature modules
+    HealthModule,
     AgentsModule,
     PropertiesModule,
     TransactionsModule,
