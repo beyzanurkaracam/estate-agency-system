@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { envValidationSchema } from './config/env.validation';
 import { AgentsModule } from './modules/agents.module';
 import { PropertiesModule } from './modules/properties/properties.module';
+import { TransactionsModule } from './modules/transactions/transactions.module';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { PropertiesModule } from './modules/properties/properties.module';
     // Feature modules
     AgentsModule,
     PropertiesModule,
-    // TransactionsModule → bir sonraki adımda
+    TransactionsModule,
   ],
 })
 export class AppModule {}
