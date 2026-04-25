@@ -53,7 +53,7 @@ export class BreakdownAgent {
   roles!: AgentRole[];
 
   @Prop({ required: true, min: 0 })
-  amount!: number; 
+  amount!: number; // integer, in the transaction's currency minor unit
 
   @Prop({ required: true, min: 0, max: 100 })
   percentage!: number;
@@ -69,7 +69,7 @@ export class FinancialBreakdown {
   calculatedAt!: Date;
 
   @Prop({ required: true, min: 0 })
-  agencyShare!: number; // kuruş
+  agencyShare!: number; // integer, in the transaction's currency minor unit
 
   @Prop({ type: [BreakdownAgentSchema], required: true })
   agents!: BreakdownAgent[];
@@ -113,7 +113,13 @@ export class Transaction {
   @Prop({ required: true, min: 1 })
   totalServiceFee!: number;
 
-  @Prop({ default: 'TRY' })
+  @Prop({
+    type: String,
+    default: 'TRY',
+    uppercase: true,
+    trim: true,
+    match: /^[A-Z]{3}$/,
+  })
   currency!: string;
 
   @Prop({

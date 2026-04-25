@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { CreateTransactionInput } from '~/types/api'
-import { SUPPORTED_CURRENCIES } from '~/types/api'
 
 const agentsStore = useAgentsStore()
 const propsStore = usePropertiesStore()
@@ -17,6 +16,13 @@ const form = reactive<CreateTransactionInput>({
   sellingAgent: '',
   totalServiceFee: 0,
   currency: 'TRY',
+})
+
+const selectedProperty = computed(() =>
+  propsStore.items.find((p) => p.id === form.property),
+)
+watch(selectedProperty, (p) => {
+  if (p?.currency) form.currency = p.currency
 })
 
 const sameAgent = ref(false)
@@ -108,17 +114,14 @@ const onSubmit = async () => {
         </select>
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="label">Currency</label>
-          <select v-model="form.currency" class="input">
-            <option v-for="c in SUPPORTED_CURRENCIES" :key="c" :value="c">{{ c }}</option>
-          </select>
-        </div>
-        <div>
-          <label class="label">Total service fee</label>
-          <MoneyInput v-model="form.totalServiceFee" :currency="form.currency" required />
-        </div>
+      <div>
+        <label class="label">
+          Total service fee
+          <span class="text-xs text-slate-500 font-normal">
+            ({{ form.currency }} — inherited from the selected property)
+          </span>
+        </label>
+        <MoneyInput v-model="form.totalServiceFee" :currency="form.currency" required />
       </div>
       <p class="text-xs text-slate-500 -mt-2">
         50% goes to the agency, 50% is split between agents per policy.

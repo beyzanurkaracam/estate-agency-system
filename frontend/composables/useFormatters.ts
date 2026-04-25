@@ -6,12 +6,21 @@ import type {
 } from '~/types/api'
 
 export const useFormatters = () => {
-  const formatMoney = (kurus: number, currency = 'TRY'): string => {
-    const value = kurus / 100
+  const { minorUnitFactor, minorUnitDecimals } = useCurrency()
+
+  /**
+   * Render an integer amount stored in the currency's minor unit
+   * (kuruş for TRY, cents for EUR/USD, yen for JPY, …).
+   */
+  const formatMoney = (minor: number, currency = 'TRY'): string => {
+    const code = currency || 'TRY'
+    const value = (minor ?? 0) / minorUnitFactor(code)
+    const decimals = minorUnitDecimals(code)
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
-      currency,
-      maximumFractionDigits: 2,
+      currency: code,
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
     }).format(value)
   }
 

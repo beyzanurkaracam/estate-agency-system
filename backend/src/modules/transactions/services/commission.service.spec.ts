@@ -60,7 +60,7 @@ describe('CommissionService', () => {
       });
     });
 
-    it('assigns the 1-kuruş remainder to the listing agent on odd fees', () => {
+    it('assigns the 1-unit remainder to the listing agent on odd fees', () => {
       
       const result = service.calculate(1_000_001, alice, bob);
 
@@ -79,7 +79,7 @@ describe('CommissionService', () => {
       [1_000_000],
       [999_999_999],
       [7], 
-    ])('holds for total fee of %i kuruş (same agent)', (fee) => {
+    ])('holds for total fee of %i minor units (same agent)', (fee) => {
       const result = service.calculate(fee, alice, alice);
       const sum =
         result.agencyShare + result.agents.reduce((s, a) => s + a.amount, 0);
@@ -92,7 +92,7 @@ describe('CommissionService', () => {
       [1_001],
       [1_000_001],
       [999_999_999],
-    ])('holds for total fee of %i kuruş (different agents)', (fee) => {
+    ])('holds for total fee of %i minor units (different agents)', (fee) => {
       const result = service.calculate(fee, alice, bob);
       const sum =
         result.agencyShare + result.agents.reduce((s, a) => s + a.amount, 0);

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { SupportedCurrency } from '~/types/api'
-
 const props = defineProps<{
   modelValue: number
-  currency?: SupportedCurrency
+  /** ISO 4217 code (e.g. 'TRY', 'EUR', 'JPY'). Defaults to TRY. */
+  currency?: string
   placeholder?: string
   required?: boolean
 }>()
@@ -12,17 +11,24 @@ const emit = defineEmits<{
   (e: 'update:modelValue', v: number): void
 }>()
 
-const SYMBOL: Record<SupportedCurrency, string> = { TRY: '₺', GBP: '£' }
-const symbol = computed(() => SYMBOL[props.currency ?? 'TRY'])
+const { symbolFor, minorUnitDecimals, minorUnitFactor, fromMinorUnits } =
+  useCurrency()
 
-const display = ref<string>(
-  props.modelValue ? (props.modelValue / 100).toString() : '',
+const symbol = computed(() => symbolFor(props.currency))
+const decimals = computed(() => minorUnitDecimals(props.currency))
+const step = computed(() =>
+  decimals.value === 0 ? '1' : `0.${'0'.repeat(decimals.value - 1)}1`,
+)
+const placeholder = computed(
+  () => props.placeholder ?? (decimals.value === 0 ? '0' : `0.${'0'.repeat(decimals.value)}`),
 )
 
+const display = ref<string>(fromMinorUnits(props.modelValue, props.currency))
+
 watch(
-  () => props.modelValue,
-  (v) => {
-    const next = v ? (v / 100).toString() : ''
+  () => [props.modelValue, props.currency] as const,
+  ([v]) => {
+    const next = fromMinorUnits(v, props.currency)
     if (next !== display.value) display.value = next
   },
 )
@@ -35,7 +41,7 @@ const onInput = (e: Event) => {
     emit('update:modelValue', 0)
     return
   }
-  emit('update:modelValue', Math.round(num * 100))
+  emit('update:modelValue', Math.round(num * minorUnitFactor(props.currency)))
 }
 </script>
 
@@ -45,9 +51,9 @@ const onInput = (e: Event) => {
       :value="display"
       type="number"
       inputmode="decimal"
-      step="0.01"
+      :step="step"
       min="0"
-      :placeholder="placeholder ?? '0.00'"
+      :placeholder="placeholder"
       :required="required"
       class="input pr-12"
       @input="onInput"

@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsInt, IsMongoId, IsOptional, IsPositive } from 'class-validator';
+import {
+  IsISO4217CurrencyCode,
+  IsInt,
+  IsMongoId,
+  IsOptional,
+  IsPositive,
+} from 'class-validator';
 
 export class CreateTransactionDto {
   @ApiProperty({ example: '65f1a2b3c4d5e6f7a8b9c0d1' })
@@ -19,14 +25,19 @@ export class CreateTransactionDto {
 
   @ApiProperty({
     example: 5000000,
-    description: 'Total service fee in kuruş (1 TRY = 100 kuruş)',
+    description:
+      "Total service fee as an integer in the currency's minor unit (e.g. kuruş for TRY, cents for EUR/USD).",
   })
   @IsInt()
   @IsPositive()
   totalServiceFee!: number;
 
-  @ApiPropertyOptional({ example: 'GBP', enum: ['TRY', 'GBP'] })
+  @ApiPropertyOptional({
+    example: 'EUR',
+    description:
+      "ISO 4217 currency code. If omitted, the property's currency is used.",
+  })
   @IsOptional()
-  @IsIn(['TRY', 'GBP'])
+  @IsISO4217CurrencyCode()
   currency?: string;
 }

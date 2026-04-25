@@ -49,7 +49,11 @@ export interface Property extends Timestamps {
   listedBy: ID | Agent
 }
 
-export const SUPPORTED_CURRENCIES = ['TRY', 'GBP'] as const
+/**
+ * UI dropdown defaults. The backend accepts any ISO 4217 code; this list is
+ * just the convenience subset shown in forms. Add more as needed.
+ */
+export const SUPPORTED_CURRENCIES = ['TRY', 'EUR', 'USD', 'GBP', 'JPY'] as const
 export type SupportedCurrency = typeof SUPPORTED_CURRENCIES[number]
 
 export interface CreatePropertyInput {
@@ -57,7 +61,8 @@ export interface CreatePropertyInput {
   type: PropertyType
   listingPrice: number
   listedBy: ID
-  currency?: SupportedCurrency
+  /** ISO 4217 code; defaults to 'TRY' on the server when omitted. */
+  currency?: string
 }
 
 export type TransactionStage =
@@ -94,7 +99,8 @@ export interface BreakdownAgent {
   agentId: ID
   agentName: string
   roles: AgentRole[]
-  amount: number // kuruş
+  /** Integer in the transaction's currency minor unit. */
+  amount: number
   percentage: number
 }
 
@@ -124,7 +130,8 @@ export interface CreateTransactionInput {
   listingAgent: ID
   sellingAgent: ID
   totalServiceFee: number
-  currency?: SupportedCurrency
+  /** ISO 4217. If omitted, the property's currency is inherited. */
+  currency?: string
 }
 
 export interface AdvanceStageInput {

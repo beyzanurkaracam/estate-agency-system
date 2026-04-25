@@ -36,7 +36,7 @@ export class TransactionsService {
 
   async create(dto: CreateTransactionDto): Promise<TransactionDocument> {
     // Existence checks — throw 404 if any dependency missing.
-    await this.propertiesService.findById(dto.property);
+    const property = await this.propertiesService.findById(dto.property);
     const listing = await this.agentsService.findById(dto.listingAgent);
     const selling =
       dto.listingAgent === dto.sellingAgent
@@ -46,6 +46,14 @@ export class TransactionsService {
     if (!listing.active || !selling.active) {
       throw new BadRequestException(
         'Both agents must be active to start a transaction',
+      );
+    }
+
+    const currency = (dto.currency ?? property.currency).toUpperCase();
+    if (dto.currency && property.currency &&
+        dto.currency.toUpperCase() !== property.currency.toUpperCase()) {
+      throw new BadRequestException(
+        `Transaction currency (${dto.currency}) must match the property currency (${property.currency})`,
       );
     }
 
@@ -59,6 +67,7 @@ export class TransactionsService {
       listingAgent: new Types.ObjectId(dto.listingAgent),
       sellingAgent: new Types.ObjectId(dto.sellingAgent),
       totalServiceFee: dto.totalServiceFee,
+      currency,
       stage: TransactionStage.AGREEMENT,
       stageHistory: [initialHistory],
     });

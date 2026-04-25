@@ -103,7 +103,7 @@ export class CommissionService {
   ): void {
     if (!Number.isInteger(totalServiceFee)) {
       throw new BadRequestException(
-        'totalServiceFee must be an integer (kuruş)',
+        "totalServiceFee must be an integer (currency's minor unit)",
       );
     }
     if (totalServiceFee <= 0) {

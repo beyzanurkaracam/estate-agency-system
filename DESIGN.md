@@ -23,28 +23,55 @@ Core requirements:
 
 ## 2. High-Level Architecture
 
+### 2.1 Runtime topology
+
 ```
-┌────────────────────┐        HTTPS/JSON        ┌────────────────────┐
-│  Nuxt 3 Frontend   │ ───────────────────────► │  NestJS REST API   │
-│  (Pinia, Tailwind) │ ◄─────────────────────── │  (DTOs, Services)  │
-└────────────────────┘                          └────────┬───────────┘
-                                                         │ Mongoose
-                                                         ▼
-                                                ┌────────────────────┐
-                                                │  MongoDB Atlas     │
-                                                │  (agents,          │
-                                                │   properties,      │
-                                                │   transactions)    │
-                                                └────────────────────┘
+┌──────────────────┐    HTTPS/JSON    ┌──────────────────────┐    Mongoose    ┌─────────────────┐
+│  Nuxt 3 (Vercel) │ ───────────────► │  NestJS API (Railway)│ ─────────────► │ MongoDB Atlas   │
+│  Pinia • Tailwind│ ◄─────────────── │  global ValidationPipe│ ◄───────────── │ agents          │
+│  useApi/$fetch   │                  │  AllExceptionsFilter  │                │ properties      │
+└──────────────────┘                  │  Swagger @ /api/docs  │                │ transactions    │
+                                      └──────────┬────────────┘                └─────────────────┘
+                                                 │
+                                          CORS_ORIGIN, MONGODB_URI
+                                          NUXT_PUBLIC_API_BASE
 ```
 
-- **Backend:** NestJS 11 modular monolith. Business logic lives in dedicated
-  services (`CommissionService`, `StageTransitionService`) that are independent
-  of HTTP and database concerns — making them trivially unit-testable.
+### 2.2 Backend internal layering
+
+```
+                ┌─────────────────────────────────────────────┐
+   HTTP ──►     │  Controller   (DTO validation, routing)     │
+                ├─────────────────────────────────────────────┤
+                │  Application Service                        │
+                │  ─ AgentsService                            │
+                │  ─ PropertiesService                        │
+                │  ─ TransactionsService  ───┐                │
+                ├────────────────────────────┼────────────────┤
+                │  Domain Services           │                │
+                │  ─ StageTransitionService ◄┘                │
+                │  ─ CommissionService                        │  ← pure, framework-free
+                ├─────────────────────────────────────────────┤
+                │  Persistence  (Mongoose schemas / models)   │
+                └─────────────────────────────────────────────┘
+                       │
+                       ▼
+                MongoDB Atlas
+```
+
+- **Backend:** NestJS modular monolith. Modules per aggregate
+  (`AgentsModule`, `PropertiesModule`, `TransactionsModule`); domain services
+  (`CommissionService`, `StageTransitionService`) are HTTP- and DB-agnostic so
+  they are trivially unit-testable. Cross-cutting concerns — global
+  `ValidationPipe`, `AllExceptionsFilter`, and Swagger docs — wrap every
+  controller uniformly.
 - **Frontend:** Nuxt 3 with SSR-capable pages, Pinia stores for shared state,
-  and a thin `useApi` composable that wraps `$fetch`.
+  and a thin `useApi` composable that wraps `$fetch`. No external HTTP client.
 - **Persistence:** MongoDB Atlas via Mongoose. One collection per aggregate
   (`agents`, `properties`, `transactions`).
+- **Deployment topology:** Frontend on Vercel, API on Railway, database on
+  MongoDB Atlas — each independently scalable and configured purely through
+  environment variables.
 
 ### Why a modular monolith (not microservices)
 
@@ -75,8 +102,8 @@ without a rewrite.
 {
   id, address: { street, district, city, postalCode? },
   type: 'apartment' | 'house' | 'office' | 'land',
-  listingPrice: number,       // kuruş (integer)
-  currency: 'TRY',
+  listingPrice: number,       // integer, in the currency's minor unit
+  currency: string,           // ISO 4217, e.g. 'TRY', 'EUR', 'USD', 'JPY'
   listedBy: ObjectId → Agent,
   createdAt, updatedAt
 }
@@ -94,8 +121,8 @@ without a rewrite.
   property: ObjectId → Property,
   listingAgent: ObjectId → Agent,
   sellingAgent: ObjectId → Agent,   // may equal listingAgent
-  totalServiceFee: number,          // kuruş
-  currency: 'TRY',
+  totalServiceFee: number,          // integer, in the currency's minor unit
+  currency: string,                 // ISO 4217, inherited from the property
   stage: 'agreement' | 'earnest_money' | 'title_deed' | 'completed' | 'cancelled',
   stageHistory: [{ stage, changedAt, note? }],
   financialBreakdown: null | {      // snapshot, only populated at completion
@@ -172,8 +199,8 @@ Implemented in [`CommissionService`](backend/src/modules/transactions/services/c
 throws if broken (a canary, not an expected runtime error).
 
 **Rounding rule for odd totals:** when `agentPool / 2` is fractional (e.g.
-`1_000_001` kuruş → pool `500_001` → half `250_000`, remainder `1`), the
-1-kuruş remainder is deterministically assigned to the **listing agent**.
+`1_000_001` minor units → pool `500_001` → half `250_000`, remainder `1`),
+the 1-unit remainder is deterministically assigned to the **listing agent**.
 Chosen over "random" or "round-robin" because:
 
 - It's deterministic — the same inputs always produce the same breakdown.
@@ -182,15 +209,25 @@ Chosen over "random" or "round-robin" because:
 
 ### 4.3 Money Representation
 
-All monetary fields store **integer kuruş** (1 TRY = 100 kuruş). Rationale:
+All monetary fields are stored as **integers in the currency's minor unit**
+(kuruş for TRY, cents for EUR/USD, yen for JPY since it has zero decimals).
+The `currency` field is an ISO 4217 code and travels with every amount —
+amounts are never compared or summed across currencies. Rationale:
 
-- IEEE-754 floats cannot represent `0.1 + 0.2` exactly — unacceptable for
-  money.
-- Using `Decimal128` would require extra tooling on both ends; integer kuruş
-  is simpler, universally portable, and sufficient for TRY precision.
-- The frontend `MoneyInput` component and `formatMoney` composable handle the
-  display conversion (`value / 100`, formatted via `Intl.NumberFormat`
-  `tr-TR`).
+- **No float drift.** IEEE-754 cannot represent `0.1 + 0.2` exactly —
+  unacceptable for money. Integer minor units make the commission invariant
+  (`agency + agents = total`) provable.
+- **Currency-agnostic.** Hard-coding `'TRY'` or kuruş would lock the agency to
+  a single market. Pairing an integer amount with an ISO 4217 code lets the
+  same engine handle TRY (2 decimals), EUR (2), JPY (0), or any other
+  currency without code changes.
+- **Decimal128 alternative rejected** — it solves precision but not the
+  per-currency decimal-count problem, and adds driver-specific types on both
+  the API boundary (JSON serialization) and the frontend.
+- The frontend `MoneyInput` component and `formatMoney` composable convert
+  between minor units and the display string using
+  `Intl.NumberFormat(locale, { style: 'currency', currency })`, which knows
+  each currency's decimal count automatically.
 
 ---
 
@@ -294,7 +331,10 @@ baseURL. Switching to another provider would only require changing the
 
 - **`StageBadge`** — colored pill per stage.
 - **`StageStepper`** — horizontal timeline showing current + completed stages.
-- **`MoneyInput`** — two-way binding on TRY decimal; emits integer kuruş.
+- **`MoneyInput`** — two-way binding on a major-unit decimal; emits integer
+  minor units. Symbol and decimal count are derived from the bound currency
+  via `Intl.NumberFormat` (the `useCurrency` composable), so any ISO 4217
+  code works without a hard-coded symbol/decimals table.
 - **`LoadingState`**, **`EmptyState`**, **`ErrorAlert`** — consistent zero/
   loading/error presentation.
 

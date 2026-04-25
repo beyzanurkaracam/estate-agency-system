@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
-  IsIn,
+  IsISO4217CurrencyCode,
   IsInt,
   IsMongoId,
   IsOptional,
@@ -24,7 +24,8 @@ export class CreatePropertyDto {
 
   @ApiProperty({
     example: 25000000,
-    description: 'Listing price in kuruş (minor unit). 1 TRY = 100 kuruş.',
+    description:
+      "Listing price as an integer in the currency's minor unit (e.g. kuruş for TRY, cents for EUR/USD, yen for JPY).",
   })
   @IsInt()
   @IsPositive()
@@ -34,8 +35,11 @@ export class CreatePropertyDto {
   @IsMongoId()
   listedBy!: string;
 
-  @ApiPropertyOptional({ example: 'GBP', enum: ['TRY', 'GBP'] })
+  @ApiPropertyOptional({
+    example: 'EUR',
+    description: 'ISO 4217 currency code. Defaults to TRY when omitted.',
+  })
   @IsOptional()
-  @IsIn(['TRY', 'GBP'])
+  @IsISO4217CurrencyCode()
   currency?: string;
 }

@@ -43,9 +43,15 @@ export class Property {
   type!: PropertyType;
 
   @Prop({ required: true, min: 0 })
-  listingPrice!: number;  
+  listingPrice!: number;
 
-  @Prop({ default: 'TRY' })
+  @Prop({
+    type: String,
+    default: 'TRY',
+    uppercase: true,
+    trim: true,
+    match: /^[A-Z]{3}$/,
+  })
   currency!: string;
 
   @Prop({

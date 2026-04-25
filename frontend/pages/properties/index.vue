@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CreatePropertyInput, Property, PropertyType, SupportedCurrency } from '~/types/api'
+import type { CreatePropertyInput, Property, PropertyType } from '~/types/api'
 import { PROPERTY_TYPES, SUPPORTED_CURRENCIES } from '~/types/api'
 
 const propsStore = usePropertiesStore()
@@ -281,7 +281,11 @@ const onDeleteConfirm = async () => {
             </div>
             <div>
               <label class="label">Listing price</label>
-              <MoneyInput v-model="editForm.listingPrice" required />
+              <MoneyInput
+                v-model="editForm.listingPrice"
+                :currency="editTarget?.currency"
+                required
+              />
             </div>
             <div class="sm:col-span-2">
               <label class="label">Listed by</label>
