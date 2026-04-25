@@ -1,11 +1,10 @@
-// src/modules/properties/properties.service.ts
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';  // FilterQuery'yi çıkar
+import { Model, Types } from 'mongoose';  
 import { AgentsService } from '../agents/agents.service';
 import {
   Property,
@@ -44,7 +43,7 @@ export class PropertiesService {
   }
 
   async findAll(filters: PropertyListFilters = {}): Promise<PropertyDocument[]> {
-    const query: Record<string, any> = {};  // ← FilterQuery yerine Record
+    const query: Record<string, any> = {};  
     if (filters.city) query['address.city'] = filters.city;
     if (filters.type) query.type = filters.type;
     if (filters.listedBy) query.listedBy = new Types.ObjectId(filters.listedBy);
@@ -67,9 +66,16 @@ export class PropertiesService {
     return property;
   }
 
+  async remove(id: string): Promise<void> {
+    const property = await this.propertyModel.findByIdAndDelete(id).exec();
+    if (!property) {
+      throw new NotFoundException(`Property not found: ${id}`);
+    }
+  }
+
   async update(
     id: string,
-    dto: CreatePropertyDto,  // ← CreatePropertyDto değil!
+    dto: CreatePropertyDto,
   ): Promise<PropertyDocument> {
     if (dto.listedBy) {
       const agent = await this.agentsService.findById(dto.listedBy);

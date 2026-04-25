@@ -9,15 +9,13 @@ import type {
   ID,
   Property,
   PropertyFilters,
+  QueryParams,
   Transaction,
   TransactionFilters,
   UpdateAgentInput,
 } from '~/types/api'
 
-/**
- * Thin API client for the NestJS backend. All methods throw on non-2xx;
- * callers should wrap calls in stores' withLoading helper to surface errors.
- */
+
 export const useApi = () => {
   const config = useRuntimeConfig()
   const base = config.public.apiBase
@@ -26,20 +24,20 @@ export const useApi = () => {
     path: string,
     opts: {
       method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'
-      body?: unknown
-      query?: Record<string, string | undefined>
+      body?: object
+      query?: QueryParams
     } = {},
   ): Promise<T> => {
     return $fetch<T>(path, {
       baseURL: base,
       method: opts.method ?? 'GET',
-      body: opts.body,
+      body: opts.body as Record<string, unknown>,
       query: opts.query,
     })
   }
 
   return {
-    // ---------- Agents ----------
+    
     agents: {
       list: (opts?: { includeInactive?: boolean }) =>
         request<Agent[]>('/agents', {
@@ -54,7 +52,7 @@ export const useApi = () => {
         request<Agent>(`/agents/${id}`, { method: 'DELETE' }),
     },
 
-    // ---------- Properties ----------
+    
     properties: {
       list: (filters: PropertyFilters = {}) =>
         request<Property[]>('/properties', { query: filters }),
@@ -63,9 +61,11 @@ export const useApi = () => {
         request<Property>('/properties', { method: 'POST', body }),
       update: (id: ID, body: CreatePropertyInput) =>
         request<Property>(`/properties/${id}`, { method: 'PATCH', body }),
+      remove: (id: ID) =>
+        request<void>(`/properties/${id}`, { method: 'DELETE' }),
     },
 
-    // ---------- Transactions ----------
+    
     transactions: {
       list: (filters: TransactionFilters = {}) =>
         request<Transaction[]>('/transactions', { query: filters }),

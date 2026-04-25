@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsMongoId, IsPositive } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsIn, IsInt, IsMongoId, IsOptional, IsPositive } from 'class-validator';
 
 export class CreateTransactionDto {
   @ApiProperty({ example: '65f1a2b3c4d5e6f7a8b9c0d1' })
@@ -24,4 +24,9 @@ export class CreateTransactionDto {
   @IsInt()
   @IsPositive()
   totalServiceFee!: number;
+
+  @ApiPropertyOptional({ example: 'GBP', enum: ['TRY', 'GBP'] })
+  @IsOptional()
+  @IsIn(['TRY', 'GBP'])
+  currency?: string;
 }

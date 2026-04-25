@@ -1,4 +1,3 @@
-// src/main.ts
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -19,31 +18,26 @@ async function bootstrap() {
     .map((o) => o.trim())
     .filter(Boolean);
 
-  // Global API prefix — /agents yerine /api/agents
   app.setGlobalPrefix(apiPrefix);
 
-  // CORS — virgüllü liste: birden fazla origin desteği (prod + preview)
   app.enableCors({
     origin: corsOrigins.length > 1 ? corsOrigins : corsOrigins[0],
     credentials: true,
   });
 
-  // Global validation — DTO'ları class-validator ile doğrula
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,              // DTO'da olmayan field'ları at
-      forbidNonWhitelisted: true,   // DTO'da olmayan field varsa hata
-      transform: true,              // Payload'ı DTO tipine çevir
+      whitelist: true,             
+      forbidNonWhitelisted: true,   
+      transform: true,              
       transformOptions: {
         enableImplicitConversion: true,
       },
     }),
   );
 
-  // Global exception filter
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  // Swagger docs
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Estate Agency Transaction API')
     .setDescription(

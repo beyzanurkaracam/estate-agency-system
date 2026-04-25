@@ -1,8 +1,10 @@
-// src/modules/properties/properties.controller.ts
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -48,5 +50,12 @@ export class PropertiesController {
     @Body() dto: CreatePropertyDto,
   ) {
     return this.propertiesService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a property' })
+  remove(@Param('id', ParseObjectIdPipe) id: string) {
+    return this.propertiesService.remove(id);
   }
 }

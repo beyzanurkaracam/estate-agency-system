@@ -1,4 +1,3 @@
-// src/modules/transactions/dto/advance-stage.dto.ts
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 import { TransactionStage } from '../schemas/transaction.schema';

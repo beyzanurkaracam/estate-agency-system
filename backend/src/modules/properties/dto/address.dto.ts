@@ -1,4 +1,3 @@
-// src/modules/properties/dto/address.dto.ts
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsNotEmpty,

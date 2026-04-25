@@ -67,5 +67,11 @@ export const usePropertiesStore = defineStore('properties', {
       this.items = this.items.map((p) => (p.id === id ? updated : p))
       return updated
     },
+
+    async remove(id: ID): Promise<void> {
+      const api = useApi()
+      await api.properties.remove(id)
+      this.items = this.items.filter((p) => p.id !== id)
+    },
   },
 })

@@ -1,4 +1,3 @@
-// src/modules/transactions/schemas/transaction.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
@@ -17,7 +16,6 @@ export enum AgentRole {
   SELLING = 'selling',
 }
 
-// ---------- Sub-document: StageHistoryEntry ----------
 
 @Schema({ _id: false })
 export class StageHistoryEntry {
@@ -38,7 +36,6 @@ export class StageHistoryEntry {
 export const StageHistoryEntrySchema =
   SchemaFactory.createForClass(StageHistoryEntry);
 
-// ---------- Sub-document: BreakdownAgent ----------
 
 @Schema({ _id: false })
 export class BreakdownAgent {
@@ -46,7 +43,7 @@ export class BreakdownAgent {
   agentId!: Types.ObjectId;
 
   @Prop({ required: true })
-  agentName!: string; // snapshot — accounting immutability
+  agentName!: string; 
 
   @Prop({
     type: [String],
@@ -56,7 +53,7 @@ export class BreakdownAgent {
   roles!: AgentRole[];
 
   @Prop({ required: true, min: 0 })
-  amount!: number; // kuruş
+  amount!: number; 
 
   @Prop({ required: true, min: 0, max: 100 })
   percentage!: number;
@@ -65,7 +62,6 @@ export class BreakdownAgent {
 export const BreakdownAgentSchema =
   SchemaFactory.createForClass(BreakdownAgent);
 
-// ---------- Sub-document: FinancialBreakdown ----------
 
 @Schema({ _id: false })
 export class FinancialBreakdown {
@@ -84,8 +80,6 @@ export class FinancialBreakdown {
 
 export const FinancialBreakdownSchema =
   SchemaFactory.createForClass(FinancialBreakdown);
-
-// ---------- Main: Transaction ----------
 
 @Schema({
   timestamps: true,
@@ -117,7 +111,7 @@ export class Transaction {
   sellingAgent!: Types.ObjectId;
 
   @Prop({ required: true, min: 1 })
-  totalServiceFee!: number; // kuruş
+  totalServiceFee!: number;
 
   @Prop({ default: 'TRY' })
   currency!: string;

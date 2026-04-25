@@ -1,4 +1,3 @@
-// src/modules/agents/agents.module.ts
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AgentsController } from './agents/agents.controller';
@@ -11,6 +10,6 @@ import { Agent, AgentSchema } from './agents/schemas/agent.schema';
   ],
   controllers: [AgentsController],
   providers: [AgentsService],
-  exports: [AgentsService],  // Transactions modülü agents'a bakacak, export şart
+  exports: [AgentsService],  
 })
 export class AgentsModule {}

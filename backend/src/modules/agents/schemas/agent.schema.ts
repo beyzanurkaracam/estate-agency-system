@@ -1,4 +1,3 @@
-// src/modules/agents/schemas/agent.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
@@ -30,7 +29,6 @@ export class Agent {
 
 export const AgentSchema = SchemaFactory.createForClass(Agent);
 
-// toJSON transform — _id yerine id, __v'yi gizle
 AgentSchema.set('toJSON', {
   virtuals: true,
   versionKey: false,

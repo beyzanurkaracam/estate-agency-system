@@ -8,7 +8,6 @@ interface State {
   error: string | null
 }
 
-/** Extracts the most useful message from a $fetch error. */
 const errorMessage = (e: unknown): string => {
   const err = e as { data?: { message?: string | string[] }; message?: string }
   const msg = err.data?.message

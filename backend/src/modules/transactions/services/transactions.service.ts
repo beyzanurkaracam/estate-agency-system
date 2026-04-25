@@ -124,7 +124,6 @@ export class TransactionsService {
       this.stageTransitionService.buildHistoryEntry(dto.nextStage, dto.note),
     );
 
-    // If we just entered "completed", snapshot the breakdown.
     if (dto.nextStage === TransactionStage.COMPLETED) {
       transaction.financialBreakdown =
         await this.buildBreakdownSnapshot(transaction);
@@ -170,7 +169,6 @@ export class TransactionsService {
     return transaction.financialBreakdown;
   }
 
-  // ---------- Private helpers ----------
 
   private async findRawById(id: string): Promise<TransactionDocument> {
     const transaction = await this.transactionModel.findById(id).exec();

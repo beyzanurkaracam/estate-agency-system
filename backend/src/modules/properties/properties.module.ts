@@ -11,8 +11,7 @@ import { AgentsModule } from '../agents.module';
     MongooseModule.forFeature([
       { name: Property.name, schema: PropertySchema },
     ]),
-    AgentsModule,  // AgentsService'i inject edebilmek için
-  ],
+    AgentsModule,   ],
   controllers: [PropertiesController],
   providers: [PropertiesService],
   exports: [PropertiesService],

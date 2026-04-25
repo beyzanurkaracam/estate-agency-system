@@ -10,16 +10,14 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
 
 @Module({
   imports: [
-    // Config — .env'i oku ve validate et
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: envValidationSchema,
       validationOptions: {
-        abortEarly: false,  // Tüm env hatalarını topla, ilkinde durma
+        abortEarly: false,  
       },
     }),
 
-    // MongoDB — async çünkü MONGODB_URI config'ten geliyor
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -27,7 +25,6 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
       }),
     }),
 
-    // Feature modules
     HealthModule,
     AgentsModule,
     PropertiesModule,

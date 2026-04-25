@@ -1,10 +1,11 @@
-// src/modules/properties/dto/create-property.dto.ts
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
+  IsIn,
   IsInt,
   IsMongoId,
+  IsOptional,
   IsPositive,
   ValidateNested,
 } from 'class-validator';
@@ -32,4 +33,9 @@ export class CreatePropertyDto {
   @ApiProperty({ example: '65f1a2b3c4d5e6f7a8b9c0d1' })
   @IsMongoId()
   listedBy!: string;
+
+  @ApiPropertyOptional({ example: 'GBP', enum: ['TRY', 'GBP'] })
+  @IsOptional()
+  @IsIn(['TRY', 'GBP'])
+  currency?: string;
 }

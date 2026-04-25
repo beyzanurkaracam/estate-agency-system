@@ -1,4 +1,3 @@
-// src/modules/properties/schemas/property.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
@@ -44,7 +43,7 @@ export class Property {
   type!: PropertyType;
 
   @Prop({ required: true, min: 0 })
-  listingPrice!: number;  // kuruş cinsinden integer
+  listingPrice!: number;  
 
   @Prop({ default: 'TRY' })
   currency!: string;

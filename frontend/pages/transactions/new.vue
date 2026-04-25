@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CreateTransactionInput } from '~/types/api'
+import { SUPPORTED_CURRENCIES } from '~/types/api'
 
 const agentsStore = useAgentsStore()
 const propsStore = usePropertiesStore()
@@ -15,6 +16,7 @@ const form = reactive<CreateTransactionInput>({
   listingAgent: '',
   sellingAgent: '',
   totalServiceFee: 0,
+  currency: 'TRY',
 })
 
 const sameAgent = ref(false)
@@ -106,13 +108,21 @@ const onSubmit = async () => {
         </select>
       </div>
 
-      <div>
-        <label class="label">Total service fee</label>
-        <MoneyInput v-model="form.totalServiceFee" required />
-        <p class="text-xs text-slate-500 mt-1">
-          50% goes to the agency, 50% is split between agents per policy.
-        </p>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="label">Currency</label>
+          <select v-model="form.currency" class="input">
+            <option v-for="c in SUPPORTED_CURRENCIES" :key="c" :value="c">{{ c }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Total service fee</label>
+          <MoneyInput v-model="form.totalServiceFee" :currency="form.currency" required />
+        </div>
       </div>
+      <p class="text-xs text-slate-500 -mt-2">
+        50% goes to the agency, 50% is split between agents per policy.
+      </p>
 
       <div class="flex justify-end gap-2 pt-2">
         <NuxtLink class="btn-secondary" to="/transactions">Cancel</NuxtLink>

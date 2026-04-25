@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
@@ -70,7 +69,7 @@ async function seed() {
           postalCode: '34710',
         },
         type: PropertyType.APARTMENT,
-        listingPrice: 450_000_000, // 4.5M TRY
+        listingPrice: 450_000_000, 
         currency: 'TRY',
         listedBy: alice._id,
       },
@@ -82,7 +81,7 @@ async function seed() {
           postalCode: '35930',
         },
         type: PropertyType.HOUSE,
-        listingPrice: 1_250_000_000, // 12.5M TRY
+        listingPrice: 1_250_000_000, 
         currency: 'TRY',
         listedBy: bob._id,
       },
@@ -93,7 +92,7 @@ async function seed() {
           city: 'İstanbul',
         },
         type: PropertyType.OFFICE,
-        listingPrice: 3_200_000_000, // 32M TRY
+        listingPrice: 3_200_000_000, 
         currency: 'TRY',
         listedBy: carol._id,
       },
@@ -103,12 +102,11 @@ async function seed() {
     const now = new Date();
     const daysAgo = (n: number) => new Date(now.getTime() - n * 86400_000);
 
-    // TX 1: agreement stage, single agent (alice listing+selling)
     await transactionModel.create({
       property: flatKadikoy._id,
       listingAgent: alice._id,
       sellingAgent: alice._id,
-      totalServiceFee: 9_000_000, // 90K TRY
+      totalServiceFee: 9_000_000, 
       stage: TransactionStage.AGREEMENT,
       stageHistory: [
         {
@@ -119,7 +117,6 @@ async function seed() {
       ],
     });
 
-    // TX 2: earnest_money stage, two agents (bob listing, alice selling)
     await transactionModel.create({
       property: houseCesme._id,
       listingAgent: bob._id,
@@ -140,8 +137,7 @@ async function seed() {
       ],
     });
 
-    // TX 3: completed, two agents (carol listing, bob selling) — with breakdown
-    const completedFee = 64_000_000; // 640K TRY
+    const completedFee = 64_000_000; 
     await transactionModel.create({
       property: officeLevent._id,
       listingAgent: carol._id,

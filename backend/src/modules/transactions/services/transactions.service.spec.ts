@@ -1,4 +1,3 @@
-// src/modules/transactions/services/transactions.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
@@ -25,7 +24,7 @@ describe('TransactionsService', () => {
     totalServiceFee: 1_000_000,
     listingAgent: new Types.ObjectId(),
     sellingAgent: new Types.ObjectId(),
-    financialBreakdown: null as any, // explicitly typed to avoid null issues
+    financialBreakdown: null as any, 
     cancelledAt: null,
     cancelReason: null,
     save: jest.fn().mockResolvedValue(undefined),

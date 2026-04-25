@@ -6,7 +6,6 @@ import type {
 } from '~/types/api'
 
 export const useFormatters = () => {
-  /** Kuruş → human-readable TRY ("₺50.000,00"). */
   const formatMoney = (kurus: number, currency = 'TRY'): string => {
     const value = kurus / 100
     return new Intl.NumberFormat('tr-TR', {
@@ -40,7 +39,6 @@ export const useFormatters = () => {
     cancelled: 'bg-rose-100 text-rose-800',
   }
 
-  /** Next stage in the happy-path progression, or null if terminal. */
   const nextStageOf = (
     stage: TransactionStage,
   ): Exclude<TransactionStage, 'cancelled'> | null => {

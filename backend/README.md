@@ -1,98 +1,83 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend — Estate Agency API (NestJS)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+REST API for the transaction lifecycle and commission distribution.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+- **Stack:** NestJS 11 · TypeScript · Mongoose · MongoDB Atlas · Swagger · Jest
+- **Docs:** `GET /api/docs` (Swagger UI once running)
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+## Setup
 
 ```bash
-$ npm install
+cp .env.example .env
+# edit .env — at minimum set MONGODB_URI to your Atlas connection string
+npm install
+npm run start:dev
 ```
 
-## Compile and run the project
+The server listens on `http://localhost:${PORT}` (default `3000`), mounts the
+API under `/api`, and exposes Swagger at `/api/docs`.
+
+### Seed demo data
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run seed
 ```
 
-## Run tests
+Inserts a few agents, properties, and a couple of transactions so the dashboard
+has something to display.
 
-```bash
-# unit tests
-$ npm run test
+## Environment variables
 
-# e2e tests
-$ npm run test:e2e
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `NODE_ENV` | no | `development` | |
+| `PORT` | no | `3000` | HTTP port |
+| `API_PREFIX` | no | `api` | Global route prefix |
+| `MONGODB_URI` | **yes** | — | MongoDB Atlas connection string |
+| `CORS_ORIGIN` | no | `http://localhost:3001` | Comma-separated list of allowed origins |
 
-# test coverage
-$ npm run test:cov
+## Scripts
+
+- `npm run start:dev` — watch mode (recommended for local dev)
+- `npm run build && npm run start:prod` — production build
+- `npm test` — unit tests (commission, stage transitions, service)
+- `npm run test:cov` — coverage report
+- `npm run seed` — insert demo data
+
+## Project layout
+
+```
+src/
+├── main.ts                     # Bootstrap (CORS, ValidationPipe, Swagger)
+├── app.module.ts
+├── config/env.validation.ts    # Joi schema for env vars
+├── common/
+│   ├── filters/                # AllExceptionsFilter
+│   └── pipes/                  # ParseObjectIdPipe
+└── modules/
+    ├── agents/
+    ├── properties/
+    ├── transactions/
+    │   ├── services/
+    │   │   ├── commission.service.ts      # 50/50 split logic
+    │   │   ├── stage-transition.service.ts # state machine
+    │   │   └── transactions.service.ts
+    │   └── ...
+    └── health/
 ```
 
-## Deployment
+## API summary
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+See [DESIGN.md](../DESIGN.md#5-api-design) for the full endpoint table. Highlights:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- `POST /api/transactions` — create (starts in `agreement`)
+- `PATCH /api/transactions/:id/stage` — advance
+- `POST /api/transactions/:id/cancel` — cancel with reason
+- `GET /api/transactions/:id/breakdown` — 404 until completed
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+## Deployment (Railway)
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+`railway.json` and `Procfile` are included. Railway auto-detects Node, runs
+`npm ci && npm run build`, then starts `node dist/main`.
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Required env vars in Railway: `MONGODB_URI`, `CORS_ORIGIN` (your Vercel URL).

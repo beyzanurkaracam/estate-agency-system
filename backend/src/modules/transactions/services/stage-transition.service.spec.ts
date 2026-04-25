@@ -24,15 +24,15 @@ describe('StageTransitionService', () => {
 
   describe('canTransition — invalid transitions', () => {
     it.each([
-      // Jumping stages
+      
       [TransactionStage.AGREEMENT, TransactionStage.TITLE_DEED],
       [TransactionStage.AGREEMENT, TransactionStage.COMPLETED],
       [TransactionStage.EARNEST_MONEY, TransactionStage.COMPLETED],
-      // Going backward
+      
       [TransactionStage.EARNEST_MONEY, TransactionStage.AGREEMENT],
       [TransactionStage.TITLE_DEED, TransactionStage.EARNEST_MONEY],
       [TransactionStage.TITLE_DEED, TransactionStage.AGREEMENT],
-      // From terminal states
+      
       [TransactionStage.COMPLETED, TransactionStage.AGREEMENT],
       [TransactionStage.COMPLETED, TransactionStage.CANCELLED],
       [TransactionStage.CANCELLED, TransactionStage.AGREEMENT],

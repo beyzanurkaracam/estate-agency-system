@@ -1,4 +1,3 @@
-// src/modules/transactions/services/commission.service.spec.ts
 import { BadRequestException } from '@nestjs/common';
 import { AgentRole } from '../schemas/transaction.schema';
 import { AgentInput, CommissionService } from './commission.service';
@@ -62,11 +61,11 @@ describe('CommissionService', () => {
     });
 
     it('assigns the 1-kuruş remainder to the listing agent on odd fees', () => {
-      // Odd total fee: 1_000_001 kuruş
+      
       const result = service.calculate(1_000_001, alice, bob);
 
       expect(result.agencyShare).toBe(500_000);
-      expect(result.agents[0].amount).toBe(250_001); // listing gets extra kuruş
+      expect(result.agents[0].amount).toBe(250_001); 
       expect(result.agents[1].amount).toBe(250_000);
       expect(result.totalDistributed).toBe(1_000_001);
     });
@@ -79,7 +78,7 @@ describe('CommissionService', () => {
       [1_000],
       [1_000_000],
       [999_999_999],
-      [7], // tiny odd number — stress test for rounding
+      [7], 
     ])('holds for total fee of %i kuruş (same agent)', (fee) => {
       const result = service.calculate(fee, alice, alice);
       const sum =

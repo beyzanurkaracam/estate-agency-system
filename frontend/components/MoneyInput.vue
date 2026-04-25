@@ -1,7 +1,9 @@
 <script setup lang="ts">
-// Accepts TRY input (decimal), emits integer kuruş.
+import type { SupportedCurrency } from '~/types/api'
+
 const props = defineProps<{
-  modelValue: number // kuruş
+  modelValue: number
+  currency?: SupportedCurrency
   placeholder?: string
   required?: boolean
 }>()
@@ -9,6 +11,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', v: number): void
 }>()
+
+const SYMBOL: Record<SupportedCurrency, string> = { TRY: '₺', GBP: '£' }
+const symbol = computed(() => SYMBOL[props.currency ?? 'TRY'])
 
 const display = ref<string>(
   props.modelValue ? (props.modelValue / 100).toString() : '',
@@ -47,8 +52,8 @@ const onInput = (e: Event) => {
       class="input pr-12"
       @input="onInput"
     />
-    <span class="absolute inset-y-0 right-3 flex items-center text-xs text-slate-500">
-      TRY
+    <span class="absolute inset-y-0 right-3 flex items-center text-xs text-slate-500 font-medium">
+      {{ symbol }}
     </span>
   </div>
 </template>

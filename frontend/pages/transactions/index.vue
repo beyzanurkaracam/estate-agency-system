@@ -4,7 +4,7 @@ import { TRANSACTION_STAGES } from '~/types/api'
 
 const txStore = useTransactionsStore()
 const agentsStore = useAgentsStore()
-const { formatMoney, formatDate, transactionSummary, agentName } = useFormatters()
+const { formatMoney, formatDate, transactionSummary, agentName, STAGE_LABEL } = useFormatters()
 
 const stageFilter = ref<TransactionStage | ''>('')
 const agentFilter = ref<string>('')
@@ -42,7 +42,7 @@ watch([stageFilter, agentFilter], () => applyFilters())
         <label class="label">Stage</label>
         <select v-model="stageFilter" class="input min-w-[160px]">
           <option value="">All stages</option>
-          <option v-for="s in TRANSACTION_STAGES" :key="s" :value="s">{{ s }}</option>
+          <option v-for="s in TRANSACTION_STAGES" :key="s" :value="s">{{ STAGE_LABEL[s] }}</option>
         </select>
       </div>
       <div>

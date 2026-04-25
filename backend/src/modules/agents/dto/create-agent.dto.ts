@@ -1,4 +1,4 @@
-// src/modules/agents/dto/create-agent.dto.ts
+
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,

@@ -1,5 +1,3 @@
-// Shared types mirroring the backend API contract.
-// Amounts are integer kuruş (1 TRY = 100 kuruş).
 
 export type ID = string
 
@@ -8,7 +6,6 @@ export interface Timestamps {
   updatedAt: string
 }
 
-// ---------- Agents ----------
 
 export interface Agent extends Timestamps {
   id: ID
@@ -26,7 +23,6 @@ export interface CreateAgentInput {
 
 export type UpdateAgentInput = Partial<CreateAgentInput> & { active?: boolean }
 
-// ---------- Properties ----------
 
 export type PropertyType = 'apartment' | 'house' | 'office' | 'land'
 
@@ -48,19 +44,21 @@ export interface Property extends Timestamps {
   id: ID
   address: Address
   type: PropertyType
-  listingPrice: number // kuruş
+  listingPrice: number 
   currency: string
   listedBy: ID | Agent
 }
+
+export const SUPPORTED_CURRENCIES = ['TRY', 'GBP'] as const
+export type SupportedCurrency = typeof SUPPORTED_CURRENCIES[number]
 
 export interface CreatePropertyInput {
   address: Address
   type: PropertyType
   listingPrice: number
   listedBy: ID
+  currency?: SupportedCurrency
 }
-
-// ---------- Transactions ----------
 
 export type TransactionStage =
   | 'agreement'
@@ -112,7 +110,7 @@ export interface Transaction extends Timestamps {
   property: ID | Property
   listingAgent: ID | Agent
   sellingAgent: ID | Agent
-  totalServiceFee: number // kuruş
+  totalServiceFee: number 
   currency: string
   stage: TransactionStage
   stageHistory: StageHistoryEntry[]
@@ -125,7 +123,8 @@ export interface CreateTransactionInput {
   property: ID
   listingAgent: ID
   sellingAgent: ID
-  totalServiceFee: number // kuruş
+  totalServiceFee: number
+  currency?: SupportedCurrency
 }
 
 export interface AdvanceStageInput {
@@ -137,14 +136,15 @@ export interface CancelTransactionInput {
   reason: string
 }
 
-// ---------- Filters ----------
 
-export interface TransactionFilters {
+export type QueryParams = Record<string, string | number | boolean | undefined>
+
+export interface TransactionFilters extends QueryParams {
   stage?: TransactionStage
   agentId?: ID
 }
 
-export interface PropertyFilters {
+export interface PropertyFilters extends QueryParams {
   city?: string
   type?: PropertyType
   listedBy?: ID
