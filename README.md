@@ -12,9 +12,10 @@ estate transactions (earnest money → title deed → completion) and
 
 ## Live URLs
 
-- **API:** _deploy to Railway and paste URL here_
-- **API docs (Swagger):** `<API URL>/api/docs`
-- **Frontend:** _deploy to Vercel and paste URL here_
+- **API:** https://estate-agency-system-production.up.railway.app/api
+- **API docs (Swagger):** https://estate-agency-system-production.up.railway.app/api/docs
+- **API health check:** https://estate-agency-system-production.up.railway.app/api/health
+- **Frontend:** https://estate-agency-system.vercel.app
 
 ## Repository layout
 
